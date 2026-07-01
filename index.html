@@ -395,16 +395,18 @@ body{font-family:'Gowun Dodum',sans-serif;color:var(--ink);line-height:1.6;
   <div class="hbar"><span class="num">09</span><h2>문제 발견 & 개선</h2></div>
   <div class="body">
     <div class="split" style="align-items:flex-start">
-      <div class="col" style="flex:0 0 30%">
-        <div class="imgbox reveal d1"><img src="emoticon_deck_assets/epoch_10.png" alt="epoch10 붕괴"></div>
+      <div class="col" style="flex:0 0 34%">
+        <div class="imgbox reveal d1"><img src="emoticon_deck_assets/epoch_10.png" alt="epoch10 붕괴" style="max-height:230px"></div>
         <div class="cap">epoch 10 — 한 얼굴이 깨져 반복되는 과적합 붕괴</div>
+        <div class="imgbox reveal d2" style="margin-top:8px"><img src="emoticon_deck_assets/lr1e4_collapse.png" alt="lr 1e-4 붕괴 예시"></div>
+        <div class="cap">lr 1e-4 — 형체 붕괴 · 사람/동물 얼굴이 뒤섞임</div>
       </div>
       <div class="col">
         <div class="sub reveal d1">관찰한 문제 → 개선책</div>
         <div class="tlist">
           <div class="t reveal d1"><b>후반 epoch 과적합/붕괴</b><span class="ft"><span class="fix">→ 개선</span> 수치 최저 E6가 아닌 <b>시각 품질 최고 E7 채택</b>, 데이터 ×5 증강·dropout 0.1로 정규화</span></div>
           <div class="t reveal d2"><b>fp16 학습 → loss NaN</b><span class="ft"><span class="fix">→ 해결</span> fp32 전환. M1/T4에서 충분히 빠름, 수치 안정성 우선</span></div>
-          <div class="t reveal d2"><b>lr 1e-4 → 이미지 완전 붕괴</b><span class="ft"><span class="fix">→ 해결</span> 10배 낮춰 1e-5→5e-6. LoRA는 기존 가중치 위 미세조정이라 lr이 작아야 함</span></div>
+          <div class="t reveal d2"><b>lr 1e-4 → 형체 붕괴 · 사람/동물 얼굴 뒤섞임</b><span class="ft"><span class="fix">→ 해결</span> 사람 얼굴이 동물과 섞여 나옴 → 10배 낮춰 1e-5→5e-6로 안정화</span></div>
           <div class="t reveal d3"><b>Colab GPU 세션 만료로 중단</b><span class="ft"><span class="fix">→ 해결</span> epoch마다 체크포인트 저장 → epoch_8에서 이어학습(resume)</span></div>
           <div class="t reveal d3"><b>동물 화풍 약함</b><span class="ft"><span class="fix">→ 개선</span> 동물 이미지 전처리 강화(크롭·대비·선명도) 후 추가 학습</span></div>
           <div class="t reveal d4"><b>배포 OOM · 스케줄러 IndexError · 업로드 403</b><span class="ft"><span class="fix">→ 해결</span> HF Spaces 16GB 이전 · DPMSolver 교체 · XSRF 비활성</span></div>
@@ -529,6 +531,10 @@ const prevB=document.getElementById('prev'),nextB=document.getElementById('next'
 let cur=0;
 slides.forEach((s,i)=>{const b=document.createElement('button');b.onclick=()=>go(i);dots.appendChild(b)});
 const de=[...dots.children];
+slides.forEach((s,i)=>{
+  const num=s.querySelector('.hbar .num');if(num)num.textContent=String(i).padStart(2,'0');
+  const pg=s.querySelector('.foot .pg');if(pg)pg.textContent=String(i+1).padStart(2,'0')+' / '+slides.length;
+});
 
 function applyBars(s){
   s.querySelectorAll('.bar-fill').forEach(b=>{b.style.width='0';requestAnimationFrame(()=>b.style.width=b.dataset.w)});
